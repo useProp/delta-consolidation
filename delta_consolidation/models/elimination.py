@@ -102,6 +102,17 @@ class ConsolElimination(models.Model):
             current += relativedelta(months=1)
 
     @api.model
+    def _is_ic(self, line, partners):
+        """True if the journal item is intercompany (docs/SPEC.md). `partners`: group._company_partners()."""
+        counterparty = partners.get(line.partner_id.id)
+        if not counterparty or counterparty == line.company_id:
+            return False
+        account = line.account_id
+        if account.account_type.startswith(PL_PREFIXES):
+            return line.journal_id != line.company_id.currency_exchange_journal_id
+        return account.account_type in BS_IC_TYPES or account.is_intercompany
+
+    @api.model
     def _ic_lines(self, group, date_from, date_to):
         """Intercompany journal items of the group dated within the period.
 
@@ -119,13 +130,7 @@ class ConsolElimination(models.Model):
         ], order='date, move_id, id')
         lines = exceptions = candidates.browse()
         for line in candidates:
-            if partners[line.partner_id.id] == line.company_id:
-                continue
-            account = line.account_id
-            if account.account_type.startswith(PL_PREFIXES):
-                if line.journal_id == line.company_id.currency_exchange_journal_id:
-                    continue
-            elif not (account.account_type in BS_IC_TYPES or account.is_intercompany):
+            if not self._is_ic(line, partners):
                 continue
             if line.currency_id.is_zero(line.amount_currency):
                 continue        # exchange-difference lines carry no nominal

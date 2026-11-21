@@ -5,3 +5,7 @@ access_consol_elimination_user,consol.elimination.user,model_delta_consol_elimin
 access_consol_elimination_readonly,consol.elimination.readonly,model_delta_consol_elimination,account.group_account_readonly,1,0,0,0
 access_consol_elimination_line_user,consol.elimination.line.user,model_delta_consol_elimination_line,account.group_account_user,1,1,1,1
 access_consol_elimination_line_readonly,consol.elimination.line.readonly,model_delta_consol_elimination_line,account.group_account_readonly,1,0,0,0
+access_consol_report_line_user,consol.report.line.user,model_delta_consol_report_line,account.group_account_user,1,1,1,1
+access_consol_report_line_readonly,consol.report.line.readonly,model_delta_consol_report_line,account.group_account_readonly,1,0,0,0
+access_consol_report_wizard_user,consol.report.wizard.user,model_delta_consol_report_wizard,account.group_account_user,1,1,1,1
+access_consol_report_wizard_readonly,consol.report.wizard.readonly,model_delta_consol_report_wizard,account.group_account_readonly,1,1,1,1
