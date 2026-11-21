@@ -42,7 +42,7 @@ class TestReport(DeltaCase):
             pl = [r for r in self.rows[month] if r['statement'] == 'pl']
             profit = defaultdict(float)
             for row in pl:
-                profit[self.entity_key(row)] += row['amount_usd'] * (1 if row['section'] == 'income' else -1)
+                profit[self.entity_key(row)] += row['amount_usd']
             for entity, value in expected.items():
                 if entity == 'GROUP':
                     continue
@@ -56,8 +56,7 @@ class TestReport(DeltaCase):
             self.assertAmount(ytd, self.expected['group_profit_ytd_usd'][month], f'group YTD {month}')
             # The P&L of the companies matches their books in local currency
             for key, value in self.expected['profit_local'][month].items():
-                local = sum(r['amount_local'] * (1 if r['section'] == 'income' else -1)
-                            for r in pl if r['company_id'] == self.companies[key].id)
+                local = sum(r['amount_local'] for r in pl if r['company_id'] == self.companies[key].id)
                 self.assertAmount(local, value, f'{key} local profit {month}')
 
     def test_group_bs(self):
@@ -97,11 +96,17 @@ class TestReport(DeltaCase):
         month = max(self.expected['profit_usd'])
         start, end = month_bounds(month)
         wizard = self.env['delta.consol.report.wizard'].create({
-            'group_id': self.group.id, 'month': str(start.month), 'year': start.year})
+            'group_id': self.group.id, 'month': str(start.month), 'year': str(start.year)})
         action = wizard.action_open_report()
         lines = self.env['delta.consol.report.line'].search(action['domain'])
         self.assertEqual(len(lines), len(self.rows[month]))
         self.assertAmount(sum(lines.filtered(lambda l: l.statement == 'bs').mapped('balance_usd')), 0.0)
+        self.assertAmount(sum(lines.filtered(lambda l: l.statement == 'pl').mapped('amount_usd')),
+                          self.expected['profit_usd'][month]['GROUP'], 'pivot P&L total = group profit')
+        self.assertNotIn('False', ' '.join(lines.mapped('account_label')))
+        for label in set(lines.filtered('is_intercompany').mapped('account_label')):
+            same = lines.filtered(lambda l: l.account_label == label and l.statement == 'bs')
+            self.assertAmount(sum(same.mapped('amount_usd')), 0.0, f'{label}: IC row not zero in the group')
         wizard.action_open_report()
         self.assertEqual(self.env['delta.consol.report.line'].search_count(action['domain']), len(lines))
 

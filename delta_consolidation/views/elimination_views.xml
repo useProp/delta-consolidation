@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_consol_elimination_list" model="ir.ui.view">
+        <field name="name">delta.consol.elimination.list</field>
+        <field name="model">delta.consol.elimination</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'draft'">
+                <field name="name"/>
+                <field name="group_id"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="line_count" string="Lines"/>
+                <field name="debit_total" sum="Total"/>
+                <field name="credit_total" sum="Total"/>
+                <field name="pl_effect" sum="Total"/>
+                <field name="transit_total"/>
+                <field name="exception_count" string="Exceptions"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-success="state == 'posted'" decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_consol_elimination_form" model="ir.ui.view">
+        <field name="name">delta.consol.elimination.form</field>
+        <field name="model">delta.consol.elimination</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_generate" type="object" string="Generate" class="btn-primary"
+                            invisible="state != 'draft'" groups="account.group_account_user"/>
+                    <button name="action_post" type="object" string="Post"
+                            invisible="state != 'draft'" groups="account.group_account_user"/>
+                    <button name="action_draft" type="object" string="Reset to draft"
+                            invisible="state != 'posted'" groups="account.group_account_user"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_exceptions" type="object" class="oe_stat_button"
+                                icon="fa-exclamation-triangle" invisible="exception_count == 0">
+                            <field name="exception_count" widget="statinfo" string="Exceptions"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="group_id" readonly="state == 'posted' or line_count"/>
+                            <field name="date_from" readonly="state == 'posted' or line_count"/>
+                            <field name="date_to" readonly="state == 'posted' or line_count"/>
+                            <field name="generated_on"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="line_count" string="Lines"/>
+                            <field name="debit_total"/>
+                            <field name="credit_total"/>
+                            <field name="pl_effect"/>
+                            <field name="transit_total"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lines" name="lines">
+                            <field name="line_ids" readonly="1">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="company_id"/>
+                                    <field name="counterparty_company_id"/>
+                                    <field name="account_id"/>
+                                    <field name="name"/>
+                                    <field name="kind"/>
+                                    <field name="source_move_id"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="debit" sum="Total"/>
+                                    <field name="credit" sum="Total"/>
+                                    <button name="action_open_source" type="object" string="Source"
+                                            icon="fa-external-link" title="Open the source journal entry"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Counterparty reconciliation" name="reconciliation">
+                            <field name="reconciliation_html" nolabel="1"/>
+                        </page>
+                        <page string="Exceptions" name="exceptions">
+                            <p class="text-muted">
+                                Intercompany journal items not in the group currency. They are not eliminated:
+                                book them in the group currency or eliminate them manually.
+                            </p>
+                            <field name="exception_line_ids" readonly="1">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="company_id"/>
+                                    <field name="move_id"/>
+                                    <field name="account_id"/>
+                                    <field name="partner_id"/>
+                                    <field name="currency_id"/>
+                                    <field name="amount_currency"/>
+                                    <field name="balance"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_consol_elimination_search" model="ir.ui.view">
+        <field name="name">delta.consol.elimination.search</field>
+        <field name="model">delta.consol.elimination</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="group_id"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="posted" string="Posted" domain="[('state', '=', 'posted')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_consol_elimination" model="ir.actions.act_window">
+        <field name="name">Elimination entries</field>
+        <field name="res_model">delta.consol.elimination</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create the elimination entry of a month</p>
+            <p>Generate collects the intercompany journal items of the month and mirrors them in the
+               group currency. The company books are never changed.</p>
+        </field>
+    </record>
+
+    <record id="view_consol_group_list" model="ir.ui.view">
+        <field name="name">delta.consol.group.list</field>
+        <field name="model">delta.consol.group</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="company_ids" widget="many2many_tags"/>
+                <field name="currency_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_consol_group_form" model="ir.ui.view">
+        <field name="name">delta.consol.group.form</field>
+        <field name="model">delta.consol.group</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="company_ids" widget="many2many_tags"/>
+                        <field name="currency_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_consol_group" model="ir.actions.act_window">
+        <field name="name">Consolidation groups</field>
+        <field name="res_model">delta.consol.group</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

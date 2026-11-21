@@ -1,6 +1,7 @@
 from datetime import date
 
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 MONTHS = [(str(m), date(2000, m, 1).strftime('%B')) for m in range(1, 13)]
 
@@ -12,10 +13,17 @@ class ConsolReportWizard(models.TransientModel):
     group_id = fields.Many2one('delta.consol.group', required=True,
                                default=lambda self: self.env['delta.consol.group'].search([], limit=1))
     month = fields.Selection(MONTHS, required=True, default=lambda self: str(fields.Date.today().month))
-    year = fields.Integer(required=True, default=lambda self: fields.Date.today().year)
+    # Char, not Integer: the web client would show 2026 as "2,026"
+    year = fields.Char(required=True, size=4, default=lambda self: str(fields.Date.today().year))
+
+    @api.constrains('year')
+    def _check_year(self):
+        for wizard in self:
+            if not (wizard.year.isdigit() and len(wizard.year) == 4):
+                raise ValidationError(self.env._('Enter the year as four digits, e.g. 2026.'))
 
     def _month_date(self):
-        return date(self.year, int(self.month), 1)
+        return date(int(self.year), int(self.month), 1)
 
     def action_open_report(self):
         self.ensure_one()
@@ -29,5 +37,4 @@ class ConsolReportWizard(models.TransientModel):
             'res_model': 'delta.consol.report.line',
             'view_mode': 'pivot,list',
             'domain': [('group_id', '=', self.group_id.id), ('month', '=', start)],
-            'context': {'search_default_statement_pl': 0},
         }

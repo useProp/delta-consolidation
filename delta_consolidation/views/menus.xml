@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_consolidation" name="Consolidation" parent="account.menu_finance"
+              sequence="25" groups="account.group_account_readonly"/>
+    <menuitem id="menu_consol_elimination" name="Elimination entries" parent="menu_consolidation"
+              action="action_consol_elimination" sequence="10"/>
+    <menuitem id="menu_consol_report" name="Group report" parent="menu_consolidation"
+              action="action_consol_report_wizard" sequence="20"/>
+    <menuitem id="menu_consol_group" name="Groups" parent="menu_consolidation"
+              action="action_consol_group" sequence="30" groups="account.group_account_user"/>
+</odoo>

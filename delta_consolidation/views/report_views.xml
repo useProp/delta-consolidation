@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_consol_report_line_pivot" model="ir.ui.view">
+        <field name="name">delta.consol.report.line.pivot</field>
+        <field name="model">delta.consol.report.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Group report" disable_linking="1">
+                <field name="statement" type="row"/>
+                <field name="section" type="row"/>
+                <field name="account_label" type="row"/>
+                <field name="entity" type="col"/>
+                <field name="amount_usd" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_consol_report_line_list" model="ir.ui.view">
+        <field name="name">delta.consol.report.line.list</field>
+        <field name="model">delta.consol.report.line</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="month"/>
+                <field name="statement"/>
+                <field name="section"/>
+                <field name="account_label"/>
+                <field name="is_intercompany"/>
+                <field name="entity"/>
+                <field name="amount_local"/>
+                <field name="local_currency_id"/>
+                <field name="amount_usd" sum="Total"/>
+                <field name="balance_usd" sum="Total"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_consol_report_line_search" model="ir.ui.view">
+        <field name="name">delta.consol.report.line.search</field>
+        <field name="model">delta.consol.report.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="account_label"/>
+                <field name="entity"/>
+                <filter name="statement_pl" string="Profit and loss" domain="[('statement', '=', 'pl')]"/>
+                <filter name="statement_bs" string="Balance sheet" domain="[('statement', '=', 'bs')]"/>
+                <separator/>
+                <filter name="intercompany" string="Intercompany" domain="[('is_intercompany', '=', True)]"/>
+                <group expand="0" string="Group by">
+                    <filter name="by_entity" string="Entity" context="{'group_by': 'entity'}"/>
+                    <filter name="by_section" string="Section" context="{'group_by': 'section'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_consol_report_wizard_form" model="ir.ui.view">
+        <field name="name">delta.consol.report.wizard.form</field>
+        <field name="model">delta.consol.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Group report">
+                <p class="text-muted">
+                    Profit and loss for the month and balance sheet at the month end, per company and for
+                    the group in the group currency. Missing or draft elimination entries of the year up to
+                    the month are generated first; posted entries are used as they are.
+                </p>
+                <group>
+                    <field name="group_id"/>
+                    <field name="month"/>
+                    <field name="year"/>
+                </group>
+                <footer>
+                    <button name="action_open_report" type="object" string="Open report" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_consol_report_wizard" model="ir.actions.act_window">
+        <field name="name">Group report</field>
+        <field name="res_model">delta.consol.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

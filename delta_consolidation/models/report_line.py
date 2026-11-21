@@ -38,7 +38,7 @@ class ConsolReportLine(models.Model):
         ('account', 'Account'), ('transit', 'Cash in transit'),
         ('cye', 'Current year earnings'), ('cta', 'CTA'),
     ], required=True, default='account')
-    account_id = fields.Many2one('account.account')
+    account_id = fields.Many2one('account.account', string='Ledger account')
     account_label = fields.Char(string='Account', required=True)
     is_intercompany = fields.Boolean(string='Intercompany')
     entity = fields.Char(required=True, help='Company name, or Eliminations.')
@@ -47,8 +47,10 @@ class ConsolReportLine(models.Model):
     local_currency_id = fields.Many2one('res.currency', string='Local currency')
     amount_local = fields.Float(
         string='Amount (local)', aggregator=None,
-        help='Company currency, natural sign. Not summed: the companies keep books in different currencies.')
-    amount_usd = fields.Float(string='Amount (group)', help='Group currency, natural sign of the section.')
+        help='Company currency, same sign as Amount (group). Not summed: the companies keep books in different currencies.')
+    amount_usd = fields.Float(
+        string='Amount (group)',
+        help='Group currency. P&L: profit contribution (income +, expense -); balance sheet: natural sign.')
     balance_usd = fields.Float(string='Balance (group)', help='Debit minus credit, group currency.')
 
     # ---------------------------------------------------------------- engine
@@ -120,7 +122,9 @@ class ConsolReportLine(models.Model):
         rows = []
         for statement, values in (('pl', pl), ('bs', bs)):
             for (company, section, row_type, account, is_ic), (local, usd) in values.items():
-                sign = natural_sign(section)
+                # P&L: profit contribution, so the statement total is the profit;
+                # balance sheet: natural sign of the section (docs/SPEC.md, Report).
+                sign = -1 if statement == 'pl' else natural_sign(section)
                 rows.append({
                     'group_id': group.id,
                     'month': start,
@@ -129,7 +133,7 @@ class ConsolReportLine(models.Model):
                     'section_sequence': SECTIONS.index(section),
                     'row_type': row_type,
                     'account_id': account.id if account else False,
-                    'account_label': self._label(row_type, account, company or group.company_ids[:1]),
+                    'account_label': self._label(row_type, account, company, is_ic),
                     'is_intercompany': is_ic,
                     'entity': company.name if company else ELIM_ENTITY,
                     'entity_sequence': entity_seq.get(company, len(entity_seq) + 1),
@@ -142,15 +146,17 @@ class ConsolReportLine(models.Model):
         return rows
 
     @api.model
-    def _label(self, row_type, account, company):
+    def _label(self, row_type, account, company, is_ic):
         if row_type == 'transit':
             return TRANSIT_LABEL
         if row_type == 'cye':
             return CYE_LABEL
         if row_type == 'cta':
             return CTA_LABEL
-        account = account.with_company(company)
-        return f'{account.code} {account.name}'
+        # account.code is company-dependent; elimination rows have no company of their own
+        account = account.with_company(company or account.company_ids[:1])
+        label = f'{account.code} {account.name}'
+        return f'{label} (IC)' if is_ic else label
 
     @api.model
     def _rebuild(self, group, month):

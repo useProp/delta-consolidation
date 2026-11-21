@@ -310,7 +310,9 @@ class ConsolEliminationLine(models.Model):
 
     def action_open_source(self):
         self.ensure_one()
-        move = self.source_line_id.move_id
+        # The source belongs to another company than the active one, by design: read the
+        # reference as superuser; the user's own access rights still apply to the opened form.
+        move = self.sudo().source_line_id.move_id
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'account.move',

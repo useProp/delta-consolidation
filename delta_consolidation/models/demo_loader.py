@@ -8,6 +8,7 @@ from odoo.tools import file_open
 _logger = logging.getLogger(__name__)
 
 DATASET_PATH = 'delta_consolidation/data/demo_dataset.json'
+ADMIN_GROUP = 'account.group_account_user'
 INVOICE_TYPES = ('out_invoice', 'in_invoice', 'out_refund', 'in_refund')
 
 
@@ -142,7 +143,11 @@ class ConsolDemo(models.AbstractModel):
     @api.model
     def _load_users(self, data, companies):
         admin = self.env.ref('base.user_admin')
-        admin.write({'company_ids': [Command.link(companies[k].id) for k in data['admin_companies']]})
+        admin.write({
+            'company_ids': [Command.link(companies[k].id) for k in data['admin_companies']],
+            # Community does not give admin the full accounting group; the module's menus need it.
+            'groups_id': [Command.link(self.env.ref(ADMIN_GROUP).id)],
+        })
         for vals in data['users']:
             user_companies = [companies[k] for k in vals['companies']]
             groups = [self.env.ref('base.group_user')] + [self.env.ref(g) for g in vals['groups']]
