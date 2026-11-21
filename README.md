@@ -6,29 +6,87 @@ Odoo module `delta_consolidation`: removes intercompany transactions and balance
 - Every elimination line links to the source journal item; the auditor opens the entry, follows the links and sees a counterparty reconciliation.
 - A **group report** per month: P&L and balance sheet for each company, the eliminations column and the group total in USD, as a pivot (Excel export is the pivot's standard button).
 
-## Run it
+## Run it from scratch (no programming needed)
 
-Needs Docker with Compose. The first run downloads the images (5–10 min); each new database takes 1–3 min.
+You end up with Odoo running on your own computer at <http://localhost:8069>, with the module and the demo data already loaded. It takes about 15 minutes, most of it waiting. Nothing is installed on your computer except Docker, and everything can be removed afterwards (step 7).
+
+### 1. Install Docker Desktop (once)
+
+Docker runs Odoo and its database in isolated "containers", so you do not install Odoo, Python or PostgreSQL yourself.
+
+- **Windows or Mac:** download Docker Desktop from <https://www.docker.com/products/docker-desktop/>, install it with the default options and start it. On Windows, accept if it asks to enable WSL 2, and restart the computer if it asks to. Wait until the Docker Desktop window says *Engine running* (a green status at the bottom left).
+- **Linux:** install Docker Engine with the Compose plugin: <https://docs.docker.com/engine/install/>.
+
+Docker Desktop must stay running while you use the project.
+
+### 2. Get the project folder
+
+- If you received a **ZIP file**, unzip it, for example to your desktop. You get a folder named `delta-consolidation` that contains this `README.md` and a file called `docker-compose.yml`.
+- If you received a **Git link**, run `git clone <the link>` in a terminal instead.
+
+### 3. Open a terminal in the project folder
+
+- **Windows:** open the `delta-consolidation` folder in File Explorer, click the address bar, type `cmd` and press Enter.
+- **Mac:** open the *Terminal* app, type `cd ` (with a space after it), drag the `delta-consolidation` folder into the Terminal window and press Enter.
+- **Linux:** right-click inside the folder and choose *Open in Terminal*.
+
+To check you are in the right place, type `docker compose version` and press Enter: it should print a version number. If it says the command is not found, Docker Desktop is not installed or not running (step 1).
+
+### 4. Load the demo (one command, about 5–10 minutes the first time)
+
+Copy this line into the terminal and press Enter:
 
 ```bash
 docker compose run --rm demo
 ```
 
-```bash
-docker compose run --rm test
-```
+The first run downloads Odoo and PostgreSQL (about 1 GB to download; keep about 5 GB of free disk space), then creates the database, installs the module and loads the demo companies, invoices and elimination entries. A lot of text scrolls by; that is normal. It is finished when the terminal shows its prompt again and one of the last lines says `Delta demo data loaded`. Running the command again is safe: it says `already loaded` and changes nothing.
+
+### 5. Start Odoo
 
 ```bash
 docker compose up -d odoo
 ```
 
-1. `demo` creates the database `delta`, installs the module and loads the demo data. Running it again changes nothing.
-2. `test` runs the automated tests on a separate database `delta_test`; exit code 0 = all green.
-3. `odoo` serves the UI at <http://localhost:8069>, database `delta`: **admin / admin**, or **auditor / auditor** for the read-only role (local passwords only).
+It returns after a few seconds with `Started`. Odoo keeps running in the background, even if you close the terminal.
 
-In the UI: *Invoicing/Accounting → Consolidation → Elimination entries / Group report*. To open the source documents of all three companies, tick the three Delta companies in the company switcher.
+### 6. Open it in your browser
 
-Reset everything: `docker compose down -v`. Check that the committed expected figures match the seeds: `python docs/oracle.py --check`.
+1. Go to <http://localhost:8069>. If the page does not open yet, wait 20 seconds and reload.
+2. Log in with email **admin** and password **admin**. (A second user, **auditor** / **auditor**, can look at everything but change nothing.)
+3. Click your company name at the top right and tick all three companies: **Delta US Inc.**, **Delta Ukraine LLC** and **Delta Poland sp. z o.o.**
+4. Click the grid icon at the top left and open **Invoicing**. In the top menu, open **Consolidation**:
+   - **Elimination entries**: the monthly entries; open *ELIM/2026/03* first.
+   - **Group report**: choose a month (for example *March*, year *2026*) and click **Open report**.
+
+The table [What to look at](#what-to-look-at) below lists the figures you should see.
+
+### 7. Stop, restart, remove
+
+| To | Run in the project folder |
+| --- | --- |
+| Stop Odoo (data is kept) | `docker compose stop` |
+| Start it again later | `docker compose up -d odoo` |
+| Remove everything, including the database, to start over from step 4 | `docker compose down -v` |
+
+### If something goes wrong
+
+| What you see | What to do |
+| --- | --- |
+| `docker: command not found`, or *Cannot connect to the Docker daemon* | Start Docker Desktop and wait for *Engine running*, then repeat the command |
+| *port is already allocated* / *address already in use* on step 5 | Another program uses port 8069 (often another Odoo). Close it, or run `docker compose down` in that other project, then repeat step 5 |
+| The browser shows an Odoo *database manager* page instead of the login | Step 4 was skipped or did not finish: run `docker compose run --rm demo`, then reload the page |
+| Login fails | Use **admin** as the email, not an email address; the database is `delta` |
+| *Consolidation* is not in the menu | You are in another app (for example Discuss): open **Invoicing** from the grid icon |
+| Anything else | Start clean: `docker compose down -v`, then steps 4–6 again |
+
+### For developers
+
+```bash
+docker compose run --rm test
+```
+
+Runs the automated tests on a separate database `delta_test`; exit code 0 means all green (about 1 minute). `python docs/oracle.py --check` confirms that the committed expected figures match the demo data.
 
 ## What to look at
 
