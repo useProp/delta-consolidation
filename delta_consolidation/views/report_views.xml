@@ -59,8 +59,9 @@
             <form string="Group report">
                 <p class="text-muted">
                     Profit and loss for the month and balance sheet at the month end, per company and for
-                    the group in the group currency. Missing or draft elimination entries of the year up to
-                    the month are generated first; posted entries are used as they are.
+                    the group in the group currency. Posted elimination entries are used as they are; the
+                    eliminations of other months are computed on the fly. Building the report creates or
+                    changes no entry.
                 </p>
                 <group>
                     <field name="group_id"/>

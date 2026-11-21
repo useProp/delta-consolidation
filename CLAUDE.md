@@ -61,4 +61,4 @@ A step is done when `docker compose run --rm test` exits 0 on a clean database a
 | `docker-compose.yml`, `odoo.conf` | Verified in step 0 |
 | `docs/PLAN.md`, `docs/TASK.md`, `docs/PLANNING_LOG.md` | Ready: context |
 | `delta_consolidation/` module code, `scripts/load_demo.py` | Built, steps 0–5 |
-| `README.md`, `ASSUMPTIONS.md`, `docs/SPEC.md`, `docs/AI_WORKFLOW.md` | Written, steps 1 and 6 |
+| `README.md`, `ASSUMPTIONS.md`, `docs/SPEC.md`, `docs/AI_WORKFLOW.md`, `docs/DECISION.md` | Written, steps 1 and 6 |

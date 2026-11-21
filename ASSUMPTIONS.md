@@ -16,9 +16,14 @@ These assumptions close what the task leaves open. Decisions taken during implem
 | 10 | Eliminated: transactions and balances — invoices, credit notes, payments, the loan | Investment in subsidiaries' equity, minority interest and unrealised profit are out of scope |
 | 11 | One calendar fiscal year, no opening balances | Carrying elimination effects across the year end is out of scope |
 | 12 | No interest is accrued on the loan | If accrued, it falls under the general income/expense elimination rule |
-| 13 | Eliminations are created with a button at month close; a draft is regenerated, a posted entry is locked | Auto-creation on every posting gives no verifiable result as of a date |
+| 13 | Eliminations are created with a button at month close; a draft is regenerated, a posted entry is locked | Auto-creation on every posting gives no verifiable result as of a date. Options rejected: `docs/DECISION.md` |
 | 14 | Delta Ukraine has a small external sale in the demo | Its description says it works only for Delta US, but the demo requires external sales for all three companies |
 | 15 | Rates: one shared table without a company, USD base; the values are illustrative | 40 / 41 / 42 / 43 UAH and 4.0 / 4.1 / 4.2 / 4.3 PLN per USD from the 1st of January–April 2026 |
+| 16 | The reporting period is a calendar month; the balance sheet is at the month's last day | The task says "a chosen month" |
+| 17 | The demo year is 2026 | The task names months but no year |
+| 18 | The auditor is a read-only accounting user who sees all three companies | The task says only that the auditor must be able to open the entry |
+| 19 | Demo payments and the loan are miscellaneous journal entries on receivable/payable and bank | They post at once with the dates the task gives; the module treats them like `account.payment` entries |
+| 20 | Group report = a pivot with an Excel export, not a PDF | The task accepts "a report, a pivot view or an export" |
 
 ## Decisions taken during implementation
 

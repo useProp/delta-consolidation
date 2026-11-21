@@ -6,6 +6,23 @@ Odoo module `delta_consolidation`: removes intercompany transactions and balance
 - Every elimination line links to the source journal item; the auditor opens the entry, follows the links and sees a counterparty reconciliation.
 - A **group report** per month: P&L and balance sheet for each company, the eliminations column and the group total in USD, as a pivot (Excel export is the pivot's standard button).
 
+Why eliminations work this way, and which options were rejected: [`docs/DECISION.md`](docs/DECISION.md).
+
+## Standard Odoo, and what the module adds
+
+| Standard Odoo, used as it is | Added by the module |
+| --- | --- |
+| Multi-company in one database, each company with its own currency | A **group** that lists its member companies and its reporting currency (USD) |
+| Invoices, vendor bills, credit notes and journal entries are the only source data | **Elimination entries**, monthly, kept in the module's own tables: draft → posted, locked once posted |
+| Each company's own partner record, used to tell that a journal item is intercompany | An *Intercompany* flag on accounts, for the loan accounts |
+| Currency rates and Odoo's own currency conversion | **Translation to USD** with a CTA line per company (one function, `_translate`) |
+| Chart of accounts (`generic_coa`) and its account types to sort P&L and balance sheet | **Group report**: P&L and balance sheet per company, eliminations and group, as a pivot |
+| Pivot view and its Excel export | **Counterparty reconciliation** on each entry, and a *Source* button on each line |
+| Accounting user groups and multi-company record rules | Access rules: only users allowed in all three companies see the group; a read-only **auditor** |
+| — | A **demo loader** that builds the three companies and their documents with one command |
+
+The module never writes journal entries, so each company's standard reports show its real books.
+
 ## Run it from scratch (no programming needed)
 
 You end up with Odoo running on your own computer at <http://localhost:8069>, with the module and the demo data already loaded. It takes about 15 minutes, most of it waiting. Nothing is installed on your computer except Docker, and everything can be removed afterwards (step 7).
@@ -88,6 +105,18 @@ docker compose run --rm test
 
 Runs the automated tests on a separate database `delta_test`; exit code 0 means all green (about 1 minute). `python docs/oracle.py --check` confirms that the committed expected figures match the demo data.
 
+## Check the group results in five steps (for a controller)
+
+Odoo is running with the demo data (steps 4–5 above). The auditor login is enough, and it cannot change anything.
+
+1. **Log in and see all three companies.** Go to <http://localhost:8069> and log in as **auditor** / **auditor**. Click the company name at the top right and tick all three companies.
+2. **Open the group report for March.** Click the grid icon at the top left, then **Invoicing → Consolidation → Group report**. Set *Month* to **March** and *Year* to **2026**, then click **Open report**. The columns are the three companies, *Eliminations* and *Total*. *Total* is the group.
+3. **Check that intercompany is gone.** In the *Total* column, every row marked **(IC)** is **0.00**. Group profit (*Profit and loss* row) is **86,000**: external revenue 200,000 minus costs 114,000. Group assets are **794,166.67**.
+4. **Open the elimination entry the auditor signs.** **Consolidation → Elimination entries → ELIM/2026/03**. Debit total = credit total = **94,000**, effect on profit **−50,000**, cash in transit **10,000**. The *Counterparty reconciliation* tab explains both differences: Ukraine's 50,000 March invoice that Delta US booked in April, and Delta US's 10,000 payment that Delta Poland received on 1 April.
+5. **Trace a line back to the books.** On any line of the entry, click **Source**: the company's original invoice or entry opens. Then open **Accounting → Journal Entries**: there are no ELIM entries there, so each company's books are unchanged.
+
+To download the report, use the download button above the pivot (Excel). The table below lists more figures to compare.
+
 ## What to look at
 
 | Where | What you should see |
@@ -126,7 +155,7 @@ One file, [`delta_consolidation/data/demo_dataset.json`](delta_consolidation/dat
 
 ## Assumptions
 
-See [`ASSUMPTIONS.md`](ASSUMPTIONS.md): 15 assumptions made before implementation (Odoo 18 Community, separate root companies, one `generic_coa` chart, USD intercompany documents without taxes, current-rate translation with CTA, no revaluation of intercompany balances, monthly button-driven entries, …) and the decisions taken when Odoo behaved differently from the plan.
+See [`ASSUMPTIONS.md`](ASSUMPTIONS.md): 20 assumptions made before implementation (Odoo 18 Community, separate root companies, one `generic_coa` chart, USD intercompany documents without taxes, current-rate translation with CTA, no revaluation of intercompany balances, monthly button-driven entries, …) and the decisions taken when Odoo behaved differently from the plan.
 
 ## Not done, and why
 
@@ -147,6 +176,7 @@ See [`ASSUMPTIONS.md`](ASSUMPTIONS.md): 15 assumptions made before implementatio
 | Path | Contents |
 | --- | --- |
 | `delta_consolidation/` | The module: `models/` (group, elimination entry, report, demo loader), `wizard/`, `views/`, `security/`, `data/`, `tests/`, `scripts/load_demo.py` |
+| `docs/DECISION.md` | Decision note: how, when and where eliminations are created; options rejected |
 | `docs/SPEC.md` | Rules and models |
 | `docs/PLAN.md`, `docs/PLANNING_LOG.md` | The plan written before implementation, and how it was made |
 | `docs/AI_WORKFLOW.md` | How AI was used, and how its output was checked |
