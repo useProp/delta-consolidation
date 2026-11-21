@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 2s
+      retries: 30
+
+  odoo: &odoo
+    image: odoo:18.0
+    depends_on:
+      db:
+        condition: service_healthy
+    ports: ["8069:8069"]
+    volumes:
+      - ./delta_consolidation:/mnt/extra-addons/delta_consolidation
+      - ./odoo.conf:/etc/odoo/odoo.conf:ro
+      - odoo-data:/var/lib/odoo
+    command: ["odoo", "-d", "delta"]
+
+  demo:
+    <<: *odoo
+    profiles: ["tools"]
+    entrypoint: ["bash", "-c"]
+    command:
+      - >-
+        odoo -d delta -i delta_consolidation
+        --without-demo=all --stop-after-init
+        && odoo shell -d delta --no-http
+        < /mnt/extra-addons/delta_consolidation/scripts/load_demo.py
+
+  test:
+    <<: *odoo
+    profiles: ["tools"]
+    command: ["odoo", "-d", "delta_test", "-i", "delta_consolidation",
+              "--without-demo=all", "--test-tags", "/delta_consolidation", "--stop-after-init"]
+
+volumes:
+  db-data:
+  odoo-data:

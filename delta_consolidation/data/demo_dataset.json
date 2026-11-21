@@ -1,0 +1,102 @@
+{
+  "about": "Single source of truth for Delta Group demo data. Read by models/demo_loader.py (Odoo) and docs/oracle.py (expected figures). Amounts: invoices in document currency; entry lines in company currency (balance > 0 = debit), amount_currency in the line currency.",
+  "version": 1,
+  "group": {"name": "Delta Group", "currency": "USD"},
+  "companies": {
+    "US": {"name": "Delta US Inc.", "currency": "USD"},
+    "UA": {"name": "Delta Ukraine LLC", "currency": "UAH"},
+    "PL": {"name": "Delta Poland sp. z o.o.", "currency": "PLN"}
+  },
+  "rates_per_usd": {
+    "UAH": {"2026-01-01": 40.0, "2026-02-01": 41.0, "2026-03-01": 42.0, "2026-04-01": 43.0},
+    "PLN": {"2026-01-01": 4.0, "2026-02-01": 4.1, "2026-03-01": 4.2, "2026-04-01": 4.3}
+  },
+  "accounts": {
+    "bank": {"source": "bank_journal", "account_type": "asset_cash", "label": "Bank"},
+    "receivable": {"xmlid": "receivable", "account_type": "asset_receivable", "label": "Receivable"},
+    "payable": {"xmlid": "payable", "account_type": "liability_payable", "label": "Payable"},
+    "income": {"xmlid": "income", "account_type": "income", "label": "Revenue"},
+    "cost_of_goods_sold": {"xmlid": "cost_of_goods_sold", "account_type": "expense_direct_cost", "label": "Cost of revenue"},
+    "expense": {"xmlid": "expense", "account_type": "expense", "label": "Other expenses"},
+    "expense_salary": {"xmlid": "expense_salary", "account_type": "expense", "label": "Salaries"},
+    "expense_rent": {"xmlid": "expense_rent", "account_type": "expense", "label": "Rent"},
+    "capital": {"xmlid": "capital", "account_type": "equity", "label": "Capital"},
+    "non_current_liabilities": {"xmlid": "non_current_liabilities", "account_type": "liability_non_current", "label": "Bank loan"},
+    "ic_loan_receivable": {"create": {"code": "1920", "name": "Intercompany loan receivable"}, "account_type": "asset_non_current", "is_intercompany": true, "label": "IC loan receivable"},
+    "ic_loan_payable": {"create": {"code": "2920", "name": "Intercompany loan payable"}, "account_type": "liability_non_current", "is_intercompany": true, "label": "IC loan payable"}
+  },
+  "partners": {
+    "us_customer": {"name": "US Client Co.", "company": "US"},
+    "us_vendor": {"name": "US Vendor Co.", "company": "US"},
+    "ua_customer": {"name": "UA Client LLC", "company": "UA"},
+    "ua_landlord": {"name": "UA Landlord LLC", "company": "UA"},
+    "pl_customer": {"name": "PL Client sp. z o.o.", "company": "PL"},
+    "pl_landlord": {"name": "PL Landlord sp. z o.o.", "company": "PL"}
+  },
+  "users": [
+    {"login": "auditor", "password": "auditor", "name": "Group Auditor", "groups": ["account.group_account_readonly"], "companies": ["US", "UA", "PL"]}
+  ],
+  "admin_companies": ["US", "UA", "PL"],
+  "documents": [
+    {"id": "us_capital", "company": "US", "type": "entry", "date": "2026-01-02", "ref": "Share capital", "lines": [
+      {"account": "bank", "balance": 500000}, {"account": "capital", "balance": -500000}]},
+    {"id": "us_loan_ua", "company": "US", "type": "entry", "date": "2026-01-15", "ref": "Loan to Delta Ukraine", "lines": [
+      {"account": "ic_loan_receivable", "balance": 200000, "partner": "UA"}, {"account": "bank", "balance": -200000}]},
+    {"id": "ua_loan_us", "company": "UA", "type": "entry", "date": "2026-01-15", "ref": "Loan from Delta US", "lines": [
+      {"account": "bank", "balance": 8000000}, {"account": "ic_loan_payable", "balance": -8000000, "currency": "USD", "amount_currency": -200000, "partner": "US"}]},
+    {"id": "pl_bank_loan", "company": "PL", "type": "entry", "date": "2026-01-02", "ref": "Bank loan", "lines": [
+      {"account": "bank", "balance": 200000}, {"account": "non_current_liabilities", "balance": -200000}]},
+
+    {"id": "us_sale_01", "company": "US", "type": "out_invoice", "partner": "us_customer", "currency": "USD", "invoice_date": "2026-01-31", "lines": [{"account": "income", "name": "Services January", "amount": 150000}]},
+    {"id": "us_sale_02", "company": "US", "type": "out_invoice", "partner": "us_customer", "currency": "USD", "invoice_date": "2026-02-28", "lines": [{"account": "income", "name": "Services February", "amount": 160000}]},
+    {"id": "us_sale_03", "company": "US", "type": "out_invoice", "partner": "us_customer", "currency": "USD", "invoice_date": "2026-03-31", "lines": [{"account": "income", "name": "Services March", "amount": 170000}]},
+    {"id": "us_salary_01", "company": "US", "type": "entry", "date": "2026-01-31", "ref": "Payroll January", "lines": [{"account": "expense_salary", "balance": 60000}, {"account": "bank", "balance": -60000}]},
+    {"id": "us_salary_02", "company": "US", "type": "entry", "date": "2026-02-28", "ref": "Payroll February", "lines": [{"account": "expense_salary", "balance": 60000}, {"account": "bank", "balance": -60000}]},
+    {"id": "us_salary_03", "company": "US", "type": "entry", "date": "2026-03-31", "ref": "Payroll March", "lines": [{"account": "expense_salary", "balance": 60000}, {"account": "bank", "balance": -60000}]},
+    {"id": "us_vendor_01", "company": "US", "type": "in_invoice", "partner": "us_vendor", "currency": "USD", "invoice_date": "2026-01-31", "lines": [{"account": "expense", "name": "Office services January", "amount": 5000}]},
+    {"id": "us_vendor_02", "company": "US", "type": "in_invoice", "partner": "us_vendor", "currency": "USD", "invoice_date": "2026-02-28", "lines": [{"account": "expense", "name": "Office services February", "amount": 5000}]},
+    {"id": "us_vendor_03", "company": "US", "type": "in_invoice", "partner": "us_vendor", "currency": "USD", "invoice_date": "2026-03-31", "lines": [{"account": "expense", "name": "Office services March", "amount": 5000}]},
+
+    {"id": "ua_inv_us_01", "company": "UA", "type": "out_invoice", "partner": "US", "currency": "USD", "invoice_date": "2026-01-31", "lines": [{"account": "income", "name": "Engineering January", "amount": 40000}]},
+    {"id": "ua_inv_us_02", "company": "UA", "type": "out_invoice", "partner": "US", "currency": "USD", "invoice_date": "2026-02-28", "lines": [{"account": "income", "name": "Engineering February", "amount": 45000}]},
+    {"id": "ua_inv_us_03", "company": "UA", "type": "out_invoice", "partner": "US", "currency": "USD", "invoice_date": "2026-03-31", "lines": [{"account": "income", "name": "Engineering March", "amount": 50000}]},
+    {"id": "us_bill_ua_01", "company": "US", "type": "in_invoice", "partner": "UA", "currency": "USD", "invoice_date": "2026-01-31", "lines": [{"account": "cost_of_goods_sold", "name": "Engineering January", "amount": 40000}]},
+    {"id": "us_bill_ua_02", "company": "US", "type": "in_invoice", "partner": "UA", "currency": "USD", "invoice_date": "2026-02-28", "lines": [{"account": "cost_of_goods_sold", "name": "Engineering February", "amount": 45000}]},
+    {"id": "us_bill_ua_03", "company": "US", "type": "in_invoice", "partner": "UA", "currency": "USD", "invoice_date": "2026-03-31", "date": "2026-04-02", "lines": [{"account": "cost_of_goods_sold", "name": "Engineering March", "amount": 50000}]},
+
+    {"id": "pl_inv_us_01", "company": "PL", "type": "out_invoice", "partner": "US", "currency": "USD", "invoice_date": "2026-01-31", "lines": [{"account": "income", "name": "Design January", "amount": 10000}]},
+    {"id": "pl_inv_us_02", "company": "PL", "type": "out_invoice", "partner": "US", "currency": "USD", "invoice_date": "2026-02-28", "lines": [{"account": "income", "name": "Design February", "amount": 12000}]},
+    {"id": "pl_inv_us_03", "company": "PL", "type": "out_invoice", "partner": "US", "currency": "USD", "invoice_date": "2026-03-31", "lines": [{"account": "income", "name": "Design March", "amount": 15000}]},
+    {"id": "pl_refund_us_02", "company": "PL", "type": "out_refund", "partner": "US", "currency": "USD", "invoice_date": "2026-03-10", "reverses": "pl_inv_us_02", "lines": [{"account": "income", "name": "Partial credit on February design", "amount": 2000}]},
+    {"id": "us_bill_pl_01", "company": "US", "type": "in_invoice", "partner": "PL", "currency": "USD", "invoice_date": "2026-01-31", "lines": [{"account": "cost_of_goods_sold", "name": "Design January", "amount": 10000}]},
+    {"id": "us_bill_pl_02", "company": "US", "type": "in_invoice", "partner": "PL", "currency": "USD", "invoice_date": "2026-02-28", "lines": [{"account": "cost_of_goods_sold", "name": "Design February", "amount": 12000}]},
+    {"id": "us_bill_pl_03", "company": "US", "type": "in_invoice", "partner": "PL", "currency": "USD", "invoice_date": "2026-03-31", "lines": [{"account": "cost_of_goods_sold", "name": "Design March", "amount": 15000}]},
+    {"id": "us_refund_pl_02", "company": "US", "type": "in_refund", "partner": "PL", "currency": "USD", "invoice_date": "2026-03-10", "reverses": "us_bill_pl_02", "lines": [{"account": "cost_of_goods_sold", "name": "Partial credit on February design", "amount": 2000}]},
+    {"id": "us_pay_pl_01", "company": "US", "type": "entry", "date": "2026-03-31", "ref": "Payment to Delta Poland, January invoice", "lines": [
+      {"account": "payable", "balance": 10000, "partner": "PL"}, {"account": "bank", "balance": -10000}]},
+    {"id": "pl_receipt_us_01", "company": "PL", "type": "entry", "date": "2026-04-01", "ref": "Receipt from Delta US, January invoice", "lines": [
+      {"account": "bank", "balance": 43000}, {"account": "receivable", "balance": -43000, "currency": "USD", "amount_currency": -10000, "partner": "US"}]},
+
+    {"id": "ua_sale_01", "company": "UA", "type": "out_invoice", "partner": "ua_customer", "currency": "UAH", "invoice_date": "2026-01-31", "lines": [{"account": "income", "name": "Local services January", "amount": 400000}]},
+    {"id": "ua_sale_02", "company": "UA", "type": "out_invoice", "partner": "ua_customer", "currency": "UAH", "invoice_date": "2026-02-28", "lines": [{"account": "income", "name": "Local services February", "amount": 410000}]},
+    {"id": "ua_sale_03", "company": "UA", "type": "out_invoice", "partner": "ua_customer", "currency": "UAH", "invoice_date": "2026-03-31", "lines": [{"account": "income", "name": "Local services March", "amount": 420000}]},
+    {"id": "ua_salary_01", "company": "UA", "type": "entry", "date": "2026-01-31", "ref": "Payroll January", "lines": [{"account": "expense_salary", "balance": 1200000}, {"account": "bank", "balance": -1200000}]},
+    {"id": "ua_salary_02", "company": "UA", "type": "entry", "date": "2026-02-28", "ref": "Payroll February", "lines": [{"account": "expense_salary", "balance": 1230000}, {"account": "bank", "balance": -1230000}]},
+    {"id": "ua_salary_03", "company": "UA", "type": "entry", "date": "2026-03-31", "ref": "Payroll March", "lines": [{"account": "expense_salary", "balance": 1260000}, {"account": "bank", "balance": -1260000}]},
+    {"id": "ua_rent_01", "company": "UA", "type": "in_invoice", "partner": "ua_landlord", "currency": "UAH", "invoice_date": "2026-01-31", "lines": [{"account": "expense_rent", "name": "Office rent January", "amount": 80000}]},
+    {"id": "ua_rent_02", "company": "UA", "type": "in_invoice", "partner": "ua_landlord", "currency": "UAH", "invoice_date": "2026-02-28", "lines": [{"account": "expense_rent", "name": "Office rent February", "amount": 82000}]},
+    {"id": "ua_rent_03", "company": "UA", "type": "in_invoice", "partner": "ua_landlord", "currency": "UAH", "invoice_date": "2026-03-31", "lines": [{"account": "expense_rent", "name": "Office rent March", "amount": 84000}]},
+
+    {"id": "pl_sale_01", "company": "PL", "type": "out_invoice", "partner": "pl_customer", "currency": "PLN", "invoice_date": "2026-01-31", "lines": [{"account": "income", "name": "Design services January", "amount": 80000}]},
+    {"id": "pl_sale_02", "company": "PL", "type": "out_invoice", "partner": "pl_customer", "currency": "PLN", "invoice_date": "2026-02-28", "lines": [{"account": "income", "name": "Design services February", "amount": 82000}]},
+    {"id": "pl_sale_03", "company": "PL", "type": "out_invoice", "partner": "pl_customer", "currency": "PLN", "invoice_date": "2026-03-31", "lines": [{"account": "income", "name": "Design services March", "amount": 84000}]},
+    {"id": "pl_salary_01", "company": "PL", "type": "entry", "date": "2026-01-31", "ref": "Payroll January", "lines": [{"account": "expense_salary", "balance": 60000}, {"account": "bank", "balance": -60000}]},
+    {"id": "pl_salary_02", "company": "PL", "type": "entry", "date": "2026-02-28", "ref": "Payroll February", "lines": [{"account": "expense_salary", "balance": 61500}, {"account": "bank", "balance": -61500}]},
+    {"id": "pl_salary_03", "company": "PL", "type": "entry", "date": "2026-03-31", "ref": "Payroll March", "lines": [{"account": "expense_salary", "balance": 63000}, {"account": "bank", "balance": -63000}]},
+    {"id": "pl_rent_01", "company": "PL", "type": "in_invoice", "partner": "pl_landlord", "currency": "PLN", "invoice_date": "2026-01-31", "lines": [{"account": "expense_rent", "name": "Office rent January", "amount": 8000}]},
+    {"id": "pl_rent_02", "company": "PL", "type": "in_invoice", "partner": "pl_landlord", "currency": "PLN", "invoice_date": "2026-02-28", "lines": [{"account": "expense_rent", "name": "Office rent February", "amount": 8200}]},
+    {"id": "pl_rent_03", "company": "PL", "type": "in_invoice", "partner": "pl_landlord", "currency": "PLN", "invoice_date": "2026-03-31", "lines": [{"account": "expense_rent", "name": "Office rent March", "amount": 8400}]}
+  ],
+  "eliminations": {"posted": ["2026-01", "2026-02", "2026-03"], "draft": ["2026-04"]},
+  "report_months": ["2026-01", "2026-02", "2026-03", "2026-04"]
+}

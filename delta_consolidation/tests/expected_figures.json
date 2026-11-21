@@ -1,0 +1,800 @@
+{
+  "generated_by": "docs/oracle.py",
+  "dataset_sha256": "33f8044d6f00b28966612498cd134b3b6ffa62c0f97e565295e79db52aa97afe",
+  "group_currency": "USD",
+  "profit_usd": {
+    "2026-01": {
+      "US": 35000.0,
+      "UA": 18000.0,
+      "PL": 13000.0,
+      "ELIM": 0.0,
+      "GROUP": 66000.0
+    },
+    "2026-02": {
+      "US": 38000.0,
+      "UA": 23000.0,
+      "PL": 15000.0,
+      "ELIM": 0.0,
+      "GROUP": 76000.0
+    },
+    "2026-03": {
+      "US": 92000.0,
+      "UA": 28000.0,
+      "PL": 16000.0,
+      "ELIM": -50000.0,
+      "GROUP": 86000.0
+    },
+    "2026-04": {
+      "US": -50000.0,
+      "UA": 0.0,
+      "PL": 0.0,
+      "ELIM": 50000.0,
+      "GROUP": 0.0
+    }
+  },
+  "profit_local": {
+    "2026-01": {
+      "US": 35000.0,
+      "UA": 720000.0,
+      "PL": 52000.0
+    },
+    "2026-02": {
+      "US": 38000.0,
+      "UA": 943000.0,
+      "PL": 61500.0
+    },
+    "2026-03": {
+      "US": 92000.0,
+      "UA": 1176000.0,
+      "PL": 67200.0
+    },
+    "2026-04": {
+      "US": -50000.0,
+      "UA": 0.0,
+      "PL": 0.0
+    }
+  },
+  "external_revenue_usd": {
+    "2026-01": 180000.0,
+    "2026-02": 190000.0,
+    "2026-03": 200000.0,
+    "2026-04": 0.0
+  },
+  "group_profit_ytd_usd": {
+    "2026-01": 66000.0,
+    "2026-02": 142000.0,
+    "2026-03": 228000.0,
+    "2026-04": 228000.0
+  },
+  "eliminations": {
+    "2026-01": {
+      "lines": 12,
+      "debit": 500000.0,
+      "credit": 500000.0,
+      "pl_effect": 0.0
+    },
+    "2026-02": {
+      "lines": 8,
+      "debit": 114000.0,
+      "credit": 114000.0,
+      "pl_effect": 0.0
+    },
+    "2026-03": {
+      "lines": 12,
+      "debit": 94000.0,
+      "credit": 94000.0,
+      "pl_effect": -50000.0
+    },
+    "2026-04": {
+      "lines": 4,
+      "debit": 60000.0,
+      "credit": 60000.0,
+      "pl_effect": 50000.0
+    }
+  },
+  "balance_sheet_usd": {
+    "2026-01-31": {
+      "rows": [
+        {
+          "label": "Bank",
+          "intercompany": false,
+          "section": "asset",
+          "US": 240000.0,
+          "UA": 170000.0,
+          "PL": 35000.0,
+          "ELIM": 0.0,
+          "GROUP": 445000.0
+        },
+        {
+          "label": "Receivable",
+          "intercompany": false,
+          "section": "asset",
+          "US": 150000.0,
+          "UA": 10000.0,
+          "PL": 20000.0,
+          "ELIM": 0.0,
+          "GROUP": 180000.0
+        },
+        {
+          "label": "Receivable",
+          "intercompany": true,
+          "section": "asset",
+          "US": 0.0,
+          "UA": 40000.0,
+          "PL": 10000.0,
+          "ELIM": -50000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "IC loan receivable",
+          "intercompany": true,
+          "section": "asset",
+          "US": 200000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": -200000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "Payable",
+          "intercompany": false,
+          "section": "liability",
+          "US": 5000.0,
+          "UA": 2000.0,
+          "PL": 2000.0,
+          "ELIM": 0.0,
+          "GROUP": 9000.0
+        },
+        {
+          "label": "Bank loan",
+          "intercompany": false,
+          "section": "liability",
+          "US": 0.0,
+          "UA": 0.0,
+          "PL": 50000.0,
+          "ELIM": 0.0,
+          "GROUP": 50000.0
+        },
+        {
+          "label": "Payable",
+          "intercompany": true,
+          "section": "liability",
+          "US": 50000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": -50000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "IC loan payable",
+          "intercompany": true,
+          "section": "liability",
+          "US": 0.0,
+          "UA": 200000.0,
+          "PL": 0.0,
+          "ELIM": -200000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "Capital",
+          "intercompany": false,
+          "section": "equity",
+          "US": 500000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": 0.0,
+          "GROUP": 500000.0
+        },
+        {
+          "label": "Current year earnings",
+          "intercompany": false,
+          "section": "equity",
+          "US": 35000.0,
+          "UA": 18000.0,
+          "PL": 13000.0,
+          "ELIM": 0.0,
+          "GROUP": 66000.0
+        }
+      ],
+      "totals": {
+        "assets": {
+          "US": 590000.0,
+          "UA": 220000.0,
+          "PL": 65000.0,
+          "ELIM": -250000.0,
+          "GROUP": 625000.0
+        },
+        "liabilities_equity": {
+          "US": 590000.0,
+          "UA": 220000.0,
+          "PL": 65000.0,
+          "ELIM": -250000.0,
+          "GROUP": 625000.0
+        }
+      }
+    },
+    "2026-02-28": {
+      "rows": [
+        {
+          "label": "Bank",
+          "intercompany": false,
+          "section": "asset",
+          "US": 180000.0,
+          "UA": 135853.66,
+          "PL": 19146.34,
+          "ELIM": 0.0,
+          "GROUP": 335000.0
+        },
+        {
+          "label": "Receivable",
+          "intercompany": false,
+          "section": "asset",
+          "US": 310000.0,
+          "UA": 19756.1,
+          "PL": 39512.2,
+          "ELIM": 0.0,
+          "GROUP": 369268.29
+        },
+        {
+          "label": "Receivable",
+          "intercompany": true,
+          "section": "asset",
+          "US": 0.0,
+          "UA": 85000.0,
+          "PL": 22000.0,
+          "ELIM": -107000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "IC loan receivable",
+          "intercompany": true,
+          "section": "asset",
+          "US": 200000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": -200000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "Payable",
+          "intercompany": false,
+          "section": "liability",
+          "US": 10000.0,
+          "UA": 3951.22,
+          "PL": 3951.22,
+          "ELIM": 0.0,
+          "GROUP": 17902.44
+        },
+        {
+          "label": "Bank loan",
+          "intercompany": false,
+          "section": "liability",
+          "US": 0.0,
+          "UA": 0.0,
+          "PL": 48780.49,
+          "ELIM": 0.0,
+          "GROUP": 48780.49
+        },
+        {
+          "label": "Payable",
+          "intercompany": true,
+          "section": "liability",
+          "US": 107000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": -107000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "IC loan payable",
+          "intercompany": true,
+          "section": "liability",
+          "US": 0.0,
+          "UA": 200000.0,
+          "PL": 0.0,
+          "ELIM": -200000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "Capital",
+          "intercompany": false,
+          "section": "equity",
+          "US": 500000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": 0.0,
+          "GROUP": 500000.0
+        },
+        {
+          "label": "Current year earnings",
+          "intercompany": false,
+          "section": "equity",
+          "US": 73000.0,
+          "UA": 41000.0,
+          "PL": 28000.0,
+          "ELIM": 0.0,
+          "GROUP": 142000.0
+        },
+        {
+          "label": "CTA",
+          "intercompany": false,
+          "section": "equity",
+          "US": 0.0,
+          "UA": -4341.46,
+          "PL": -73.17,
+          "ELIM": 0.0,
+          "GROUP": -4414.63
+        }
+      ],
+      "totals": {
+        "assets": {
+          "US": 690000.0,
+          "UA": 240609.76,
+          "PL": 80658.54,
+          "ELIM": -307000.0,
+          "GROUP": 704268.29
+        },
+        "liabilities_equity": {
+          "US": 690000.0,
+          "UA": 240609.76,
+          "PL": 80658.54,
+          "ELIM": -307000.0,
+          "GROUP": 704268.29
+        }
+      }
+    },
+    "2026-03-31": {
+      "rows": [
+        {
+          "label": "Bank",
+          "intercompany": false,
+          "section": "asset",
+          "US": 110000.0,
+          "UA": 102619.05,
+          "PL": 3690.48,
+          "ELIM": 0.0,
+          "GROUP": 216309.52
+        },
+        {
+          "label": "IC cash in transit",
+          "intercompany": false,
+          "section": "asset",
+          "US": 0.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": 10000.0,
+          "GROUP": 10000.0
+        },
+        {
+          "label": "Receivable",
+          "intercompany": false,
+          "section": "asset",
+          "US": 480000.0,
+          "UA": 29285.71,
+          "PL": 58571.43,
+          "ELIM": 0.0,
+          "GROUP": 567857.14
+        },
+        {
+          "label": "Receivable",
+          "intercompany": true,
+          "section": "asset",
+          "US": 0.0,
+          "UA": 135000.0,
+          "PL": 35000.0,
+          "ELIM": -170000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "IC loan receivable",
+          "intercompany": true,
+          "section": "asset",
+          "US": 200000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": -200000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "Payable",
+          "intercompany": false,
+          "section": "liability",
+          "US": 15000.0,
+          "UA": 5857.14,
+          "PL": 5857.14,
+          "ELIM": 0.0,
+          "GROUP": 26714.29
+        },
+        {
+          "label": "Bank loan",
+          "intercompany": false,
+          "section": "liability",
+          "US": 0.0,
+          "UA": 0.0,
+          "PL": 47619.05,
+          "ELIM": 0.0,
+          "GROUP": 47619.05
+        },
+        {
+          "label": "Payable",
+          "intercompany": true,
+          "section": "liability",
+          "US": 110000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": -110000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "IC loan payable",
+          "intercompany": true,
+          "section": "liability",
+          "US": 0.0,
+          "UA": 200000.0,
+          "PL": 0.0,
+          "ELIM": -200000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "Capital",
+          "intercompany": false,
+          "section": "equity",
+          "US": 500000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": 0.0,
+          "GROUP": 500000.0
+        },
+        {
+          "label": "Current year earnings",
+          "intercompany": false,
+          "section": "equity",
+          "US": 165000.0,
+          "UA": 69000.0,
+          "PL": 44000.0,
+          "ELIM": -50000.0,
+          "GROUP": 228000.0
+        },
+        {
+          "label": "CTA",
+          "intercompany": false,
+          "section": "equity",
+          "US": 0.0,
+          "UA": -7952.38,
+          "PL": -214.29,
+          "ELIM": 0.0,
+          "GROUP": -8166.67
+        }
+      ],
+      "totals": {
+        "assets": {
+          "US": 790000.0,
+          "UA": 266904.76,
+          "PL": 97261.9,
+          "ELIM": -360000.0,
+          "GROUP": 794166.67
+        },
+        "liabilities_equity": {
+          "US": 790000.0,
+          "UA": 266904.76,
+          "PL": 97261.9,
+          "ELIM": -360000.0,
+          "GROUP": 794166.67
+        }
+      }
+    },
+    "2026-04-30": {
+      "rows": [
+        {
+          "label": "Bank",
+          "intercompany": false,
+          "section": "asset",
+          "US": 110000.0,
+          "UA": 100232.56,
+          "PL": 13604.65,
+          "ELIM": 0.0,
+          "GROUP": 223837.21
+        },
+        {
+          "label": "Receivable",
+          "intercompany": false,
+          "section": "asset",
+          "US": 480000.0,
+          "UA": 28604.65,
+          "PL": 57209.3,
+          "ELIM": 0.0,
+          "GROUP": 565813.95
+        },
+        {
+          "label": "Receivable",
+          "intercompany": true,
+          "section": "asset",
+          "US": 0.0,
+          "UA": 135000.0,
+          "PL": 25000.0,
+          "ELIM": -160000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "IC loan receivable",
+          "intercompany": true,
+          "section": "asset",
+          "US": 200000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": -200000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "Payable",
+          "intercompany": false,
+          "section": "liability",
+          "US": 15000.0,
+          "UA": 5720.93,
+          "PL": 5720.93,
+          "ELIM": 0.0,
+          "GROUP": 26441.86
+        },
+        {
+          "label": "Bank loan",
+          "intercompany": false,
+          "section": "liability",
+          "US": 0.0,
+          "UA": 0.0,
+          "PL": 46511.63,
+          "ELIM": 0.0,
+          "GROUP": 46511.63
+        },
+        {
+          "label": "Payable",
+          "intercompany": true,
+          "section": "liability",
+          "US": 160000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": -160000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "IC loan payable",
+          "intercompany": true,
+          "section": "liability",
+          "US": 0.0,
+          "UA": 200000.0,
+          "PL": 0.0,
+          "ELIM": -200000.0,
+          "GROUP": 0.0
+        },
+        {
+          "label": "Capital",
+          "intercompany": false,
+          "section": "equity",
+          "US": 500000.0,
+          "UA": 0.0,
+          "PL": 0.0,
+          "ELIM": 0.0,
+          "GROUP": 500000.0
+        },
+        {
+          "label": "Current year earnings",
+          "intercompany": false,
+          "section": "equity",
+          "US": 115000.0,
+          "UA": 69000.0,
+          "PL": 44000.0,
+          "ELIM": 0.0,
+          "GROUP": 228000.0
+        },
+        {
+          "label": "CTA",
+          "intercompany": false,
+          "section": "equity",
+          "US": 0.0,
+          "UA": -10883.72,
+          "PL": -418.6,
+          "ELIM": 0.0,
+          "GROUP": -11302.33
+        }
+      ],
+      "totals": {
+        "assets": {
+          "US": 790000.0,
+          "UA": 263837.21,
+          "PL": 95813.95,
+          "ELIM": -360000.0,
+          "GROUP": 789651.16
+        },
+        "liabilities_equity": {
+          "US": 790000.0,
+          "UA": 263837.21,
+          "PL": 95813.95,
+          "ELIM": -360000.0,
+          "GROUP": 789651.16
+        }
+      }
+    }
+  },
+  "balance_local": {
+    "2026-01-31": {
+      "US": {
+        "Bank": 240000.0,
+        "Capital": 500000.0,
+        "Current year earnings": 35000.0,
+        "IC loan receivable (IC)": 200000.0,
+        "Payable": 5000.0,
+        "Payable (IC)": 50000.0,
+        "Receivable": 150000.0
+      },
+      "UA": {
+        "Bank": 6800000.0,
+        "Current year earnings": 720000.0,
+        "IC loan payable (IC)": 8000000.0,
+        "Payable": 80000.0,
+        "Receivable": 400000.0,
+        "Receivable (IC)": 1600000.0
+      },
+      "PL": {
+        "Bank": 140000.0,
+        "Bank loan": 200000.0,
+        "Current year earnings": 52000.0,
+        "Payable": 8000.0,
+        "Receivable": 80000.0,
+        "Receivable (IC)": 40000.0
+      }
+    },
+    "2026-02-28": {
+      "US": {
+        "Bank": 180000.0,
+        "Capital": 500000.0,
+        "Current year earnings": 73000.0,
+        "IC loan receivable (IC)": 200000.0,
+        "Payable": 10000.0,
+        "Payable (IC)": 107000.0,
+        "Receivable": 310000.0
+      },
+      "UA": {
+        "Bank": 5570000.0,
+        "Current year earnings": 1663000.0,
+        "IC loan payable (IC)": 8000000.0,
+        "Payable": 162000.0,
+        "Receivable": 810000.0,
+        "Receivable (IC)": 3445000.0
+      },
+      "PL": {
+        "Bank": 78500.0,
+        "Bank loan": 200000.0,
+        "Current year earnings": 113500.0,
+        "Payable": 16200.0,
+        "Receivable": 162000.0,
+        "Receivable (IC)": 89200.0
+      }
+    },
+    "2026-03-31": {
+      "US": {
+        "Bank": 110000.0,
+        "Capital": 500000.0,
+        "Current year earnings": 165000.0,
+        "IC loan receivable (IC)": 200000.0,
+        "Payable": 15000.0,
+        "Payable (IC)": 110000.0,
+        "Receivable": 480000.0
+      },
+      "UA": {
+        "Bank": 4310000.0,
+        "Current year earnings": 2839000.0,
+        "IC loan payable (IC)": 8000000.0,
+        "Payable": 246000.0,
+        "Receivable": 1230000.0,
+        "Receivable (IC)": 5545000.0
+      },
+      "PL": {
+        "Bank": 15500.0,
+        "Bank loan": 200000.0,
+        "Current year earnings": 180700.0,
+        "Payable": 24600.0,
+        "Receivable": 246000.0,
+        "Receivable (IC)": 143800.0
+      }
+    },
+    "2026-04-30": {
+      "US": {
+        "Bank": 110000.0,
+        "Capital": 500000.0,
+        "Current year earnings": 115000.0,
+        "IC loan receivable (IC)": 200000.0,
+        "Payable": 15000.0,
+        "Payable (IC)": 160000.0,
+        "Receivable": 480000.0
+      },
+      "UA": {
+        "Bank": 4310000.0,
+        "Current year earnings": 2839000.0,
+        "IC loan payable (IC)": 8000000.0,
+        "Payable": 246000.0,
+        "Receivable": 1230000.0,
+        "Receivable (IC)": 5545000.0
+      },
+      "PL": {
+        "Bank": 58500.0,
+        "Bank loan": 200000.0,
+        "Current year earnings": 180700.0,
+        "Payable": 24600.0,
+        "Receivable": 246000.0,
+        "Receivable (IC)": 100800.0
+      }
+    }
+  },
+  "transit_usd": {
+    "2026-01-31": 0.0,
+    "2026-02-28": 0.0,
+    "2026-03-31": 10000.0,
+    "2026-04-30": 0.0
+  },
+  "ic_reconciliation_usd": {
+    "2026-01-31": [
+      {
+        "pair": "PL->US",
+        "seller_receivable": 10000.0,
+        "buyer_payable": 10000.0,
+        "seller_revenue": 10000.0,
+        "buyer_expense": 10000.0
+      },
+      {
+        "pair": "UA->US",
+        "seller_receivable": 40000.0,
+        "buyer_payable": 40000.0,
+        "seller_revenue": 40000.0,
+        "buyer_expense": 40000.0
+      }
+    ],
+    "2026-02-28": [
+      {
+        "pair": "PL->US",
+        "seller_receivable": 22000.0,
+        "buyer_payable": 22000.0,
+        "seller_revenue": 22000.0,
+        "buyer_expense": 22000.0
+      },
+      {
+        "pair": "UA->US",
+        "seller_receivable": 85000.0,
+        "buyer_payable": 85000.0,
+        "seller_revenue": 85000.0,
+        "buyer_expense": 85000.0
+      }
+    ],
+    "2026-03-31": [
+      {
+        "pair": "PL->US",
+        "seller_receivable": 35000.0,
+        "buyer_payable": 25000.0,
+        "seller_revenue": 35000.0,
+        "buyer_expense": 35000.0
+      },
+      {
+        "pair": "UA->US",
+        "seller_receivable": 135000.0,
+        "buyer_payable": 85000.0,
+        "seller_revenue": 135000.0,
+        "buyer_expense": 85000.0
+      }
+    ],
+    "2026-04-30": [
+      {
+        "pair": "PL->US",
+        "seller_receivable": 25000.0,
+        "buyer_payable": 25000.0,
+        "seller_revenue": 35000.0,
+        "buyer_expense": 35000.0
+      },
+      {
+        "pair": "UA->US",
+        "seller_receivable": 135000.0,
+        "buyer_payable": 135000.0,
+        "seller_revenue": 135000.0,
+        "buyer_expense": 135000.0
+      }
+    ]
+  },
+  "exceptions": []
+}
