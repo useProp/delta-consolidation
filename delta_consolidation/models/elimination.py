@@ -11,6 +11,12 @@ from odoo.exceptions import UserError, ValidationError
 PL_PREFIXES = ('income', 'expense')
 BS_IC_TYPES = ('asset_receivable', 'liability_payable')
 TRANSIT_LABEL = 'IC cash in transit'
+# Journal items that carry amounts: no section/note lines, no off-balance accounts
+AMOUNT_LINE_DOMAIN = [
+    ('display_type', 'not in', ('line_section', 'line_note')),
+    ('account_id.account_type', '!=', 'off_balance'),
+]
+POSTED_EDITABLE_FIELDS = {'state', 'reconciliation_frozen'}
 
 
 def month_start(day):
@@ -27,7 +33,7 @@ class ConsolElimination(models.Model):
     _order = 'date_from desc, id desc'
 
     name = fields.Char(compute='_compute_name', store=True)
-    group_id = fields.Many2one('delta.consol.group', required=True, ondelete='cascade')
+    group_id = fields.Many2one('delta.consol.group', required=True, ondelete='restrict')
     currency_id = fields.Many2one(related='group_id.currency_id')
     date_from = fields.Date(required=True)
     date_to = fields.Date(required=True)
@@ -46,6 +52,8 @@ class ConsolElimination(models.Model):
         help='Intercompany journal items that are not in the group currency and were not eliminated.')
     exception_count = fields.Integer(compute='_compute_exception_count')
     generated_on = fields.Datetime(readonly=True)
+    reconciliation_frozen = fields.Html(sanitize=False, readonly=True, copy=False,
+                                        help='Counterparty reconciliation as it was when the entry was posted.')
     reconciliation_html = fields.Html(compute='_compute_reconciliation_html', sanitize=False,
                                       string='Counterparty reconciliation')
 
@@ -78,6 +86,11 @@ class ConsolElimination(models.Model):
                                   ('id', '!=', entry.id)]):
                 raise ValidationError(self.env._('There is already an elimination entry for %s.', entry.name))
 
+    def write(self, vals):
+        if set(vals) - POSTED_EDITABLE_FIELDS and any(e.state == 'posted' for e in self):
+            raise UserError(self.env._('A posted elimination entry cannot be changed: reset it to draft first.'))
+        return super().write(vals)
+
     def unlink(self):
         if any(e.state == 'posted' for e in self):
             raise UserError(self.env._('A posted elimination entry cannot be deleted.'))
@@ -89,17 +102,6 @@ class ConsolElimination(models.Model):
         start = month_start(day)
         entry = self.search([('group_id', '=', group.id), ('date_from', '=', start)], limit=1)
         return entry or self.create({'group_id': group.id, 'date_from': start, 'date_to': month_end(start)})
-
-    @api.model
-    def _ensure_entries(self, group, day):
-        """Generate missing or draft entries from the start of the year up to `day`'s month.
-        Posted entries are left alone."""
-        current = date(day.year, 1, 1)
-        while current <= day:
-            entry = self._get_or_create(group, current)
-            if entry.state == 'draft':
-                entry.action_generate()
-            current += relativedelta(months=1)
 
     @api.model
     def _is_ic(self, line, partners):
@@ -127,7 +129,7 @@ class ConsolElimination(models.Model):
             ('date', '>=', date_from),
             ('date', '<=', date_to),
             ('partner_id', 'in', list(partners)),
-        ], order='date, move_id, id')
+        ] + AMOUNT_LINE_DOMAIN, order='date, move_id, id')
         lines = exceptions = candidates.browse()
         for line in candidates:
             if not self._is_ic(line, partners):
@@ -140,32 +142,26 @@ class ConsolElimination(models.Model):
             lines |= line
         return lines, exceptions
 
-    def action_generate(self):
-        for entry in self:
-            if entry.state == 'posted':
-                raise UserError(self.env._('%s is posted: reset it to draft before regenerating.', entry.name))
-            group = entry.group_id
-            partners = group._company_partners()
-            lines, exceptions = self._ic_lines(group, entry.date_from, entry.date_to)
-            vals, by_move = [], defaultdict(lambda: self.env['account.move.line'])
-            for line in lines:
-                by_move[line.move_id] |= line
-            for move, move_lines in by_move.items():
-                for line in move_lines:
-                    vals.append(entry._line_vals(line, partners, 'mirror', -line.amount_currency))
-                total = sum(move_lines.mapped('amount_currency'))
-                if not group.currency_id.is_zero(total):
-                    vals.append(entry._line_vals(move_lines[0], partners, 'transit', total))
-            entry.line_ids.unlink()
-            entry.write({
-                'line_ids': [fields.Command.create(v) for v in vals],
-                'exception_line_ids': [fields.Command.set(exceptions.ids)],
-                'generated_on': fields.Datetime.now(),
-            })
-            if not group.currency_id.is_zero(sum(entry.line_ids.mapped('balance'))):
-                raise UserError(self.env._('%s is not balanced.', entry.name))
-        return True
+    @api.model
+    def _compute_lines(self, group, date_from, date_to):
+        """Elimination line values for the period, without storing anything.
+        Returns (list of line values, exception journal items)."""
+        partners = group._company_partners()
+        lines, exceptions = self._ic_lines(group, date_from, date_to)
+        vals, by_move = [], defaultdict(lambda: self.env['account.move.line'])
+        for line in lines:
+            by_move[line.move_id] |= line
+        for move_lines in by_move.values():
+            for line in move_lines:
+                vals.append(self._line_vals(line, partners, 'mirror', -line.amount_currency))
+            total = sum(move_lines.mapped('amount_currency'))
+            if not group.currency_id.is_zero(total):
+                vals.append(self._line_vals(move_lines[0], partners, 'transit', total))
+        if not group.currency_id.is_zero(sum(v['balance'] for v in vals)):
+            raise UserError(self.env._('Eliminations %s – %s are not balanced.', date_from, date_to))
+        return vals, exceptions
 
+    @api.model
     def _line_vals(self, line, partners, kind, balance):
         return {
             'kind': kind,
@@ -178,17 +174,30 @@ class ConsolElimination(models.Model):
             'balance': balance,
         }
 
-    def action_post(self):
+    def action_generate(self):
         for entry in self:
-            if entry.state != 'draft':
-                continue
-            if not entry.generated_on:
-                entry.action_generate()
-            entry.state = 'posted'
+            if entry.state == 'posted':
+                raise UserError(self.env._('%s is posted: reset it to draft before regenerating.', entry.name))
+            entry.group_id._check_user_access()
+            vals, exceptions = self._compute_lines(entry.group_id, entry.date_from, entry.date_to)
+            entry.line_ids.unlink()
+            entry.write({
+                'line_ids': [fields.Command.create(v) for v in vals],
+                'exception_line_ids': [fields.Command.set(exceptions.ids)],
+                'generated_on': fields.Datetime.now(),
+            })
+        return True
+
+    def action_post(self):
+        """Regenerate from the current books, then lock, so a post never locks stale lines."""
+        for entry in self.filtered(lambda e: e.state == 'draft'):
+            entry.action_generate()
+            entry.write({'state': 'posted', 'reconciliation_frozen': entry._reconciliation_markup()})
         return True
 
     def action_draft(self):
-        self.write({'state': 'draft'})
+        self.group_id._check_user_access()
+        self.write({'state': 'draft', 'reconciliation_frozen': False})
         return True
 
     def action_open_exceptions(self):
@@ -204,7 +213,7 @@ class ConsolElimination(models.Model):
 
     # ---------------------------------------------- counterparty reconciliation
     def _ic_reconciliation(self):
-        """Per seller -> buyer pair, cumulative to the entry's month end, USD nominal."""
+        """Per seller -> buyer pair, cumulative to the entry's month end, USD nominal (live books)."""
         self.ensure_one()
         group = self.group_id
         year_start = date(self.date_to.year, 1, 1)
@@ -233,28 +242,34 @@ class ConsolElimination(models.Model):
             result.append(row)
         return result
 
-    @api.depends('date_to', 'group_id', 'line_ids')
+    def _reconciliation_markup(self):
+        self.ensure_one()
+        fmt = '{:,.2f}'.format
+        head = ['Pair', 'Seller receivable', 'Buyer payable', 'Difference',
+                'Seller revenue', 'Buyer expense', 'Difference']
+        rows = Markup('').join(
+            Markup('<tr><td>%s</td>%s</tr>') % (
+                f"{r['seller'].name} → {r['buyer'].name}",
+                Markup('').join(Markup('<td class="text-end">%s</td>') % fmt(r[k]) for k in (
+                    'seller_receivable', 'buyer_payable', 'balance_difference',
+                    'seller_revenue', 'buyer_expense', 'pl_difference')))
+            for r in self._ic_reconciliation())
+        return Markup(
+            '<p>Cumulative from 1 January to %s, %s nominal, as of %s. A non-zero difference is a '
+            'document one side has booked and the other has not yet (cut-off, cash in transit).</p>'
+            '<table class="table table-sm"><thead><tr>%s</tr></thead><tbody>%s</tbody></table>'
+        ) % (self.date_to, self.currency_id.name, fields.Datetime.now(),
+             Markup('').join(Markup('<th>%s</th>') % escape(h) for h in head), rows)
+
+    @api.depends('date_to', 'group_id', 'line_ids', 'state', 'reconciliation_frozen')
     def _compute_reconciliation_html(self):
         for entry in self:
-            if not entry.date_to or not entry.group_id:
+            if entry.state == 'posted' and entry.reconciliation_frozen:
+                entry.reconciliation_html = entry.reconciliation_frozen
+            elif entry.date_to and entry.group_id:
+                entry.reconciliation_html = entry._reconciliation_markup()
+            else:
                 entry.reconciliation_html = False
-                continue
-            fmt = '{:,.2f}'.format
-            head = ['Pair', 'Seller receivable', 'Buyer payable', 'Difference',
-                    'Seller revenue', 'Buyer expense', 'Difference']
-            rows = Markup('').join(
-                Markup('<tr><td>%s</td>%s</tr>') % (
-                    f"{r['seller'].name} → {r['buyer'].name}",
-                    Markup('').join(Markup('<td class="text-end">%s</td>') % fmt(r[k]) for k in (
-                        'seller_receivable', 'buyer_payable', 'balance_difference',
-                        'seller_revenue', 'buyer_expense', 'pl_difference')))
-                for r in entry._ic_reconciliation())
-            entry.reconciliation_html = Markup(
-                '<p>Cumulative from 1 January to %s, %s nominal. A non-zero difference is a document '
-                'one side has booked and the other has not yet (cut-off, cash in transit).</p>'
-                '<table class="table table-sm"><thead><tr>%s</tr></thead><tbody>%s</tbody></table>'
-            ) % (entry.date_to, entry.currency_id.name,
-                 Markup('').join(Markup('<th>%s</th>') % escape(h) for h in head), rows)
 
 
 class ConsolEliminationLine(models.Model):
@@ -298,7 +313,9 @@ class ConsolEliminationLine(models.Model):
 
     def write(self, vals):
         self._check_editable()
-        return super().write(vals)
+        result = super().write(vals)
+        self._check_editable()          # also blocks moving a line into a posted entry
+        return result
 
     def unlink(self):
         self._check_editable()

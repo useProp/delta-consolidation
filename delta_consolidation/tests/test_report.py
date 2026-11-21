@@ -5,7 +5,7 @@ from odoo.tests import tagged
 
 from .common import DeltaCase, month_bounds
 
-ROW_LABELS = {'transit': 'IC cash in transit', 'cye': 'Current year earnings', 'cta': 'CTA'}
+ROW_LABELS = {'transit': 'IC cash in transit', 'cye': 'Current year earnings', 're': 'Retained earnings', 'cta': 'CTA'}
 
 
 @tagged('post_install', '-at_install')

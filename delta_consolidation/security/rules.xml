@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- A user sees a consolidation group, its eliminations and its report lines only if the user
+         is allowed in every company of the group. -->
+    <record id="rule_consol_group_companies" model="ir.rule">
+        <field name="name">Consolidation group: all its companies allowed</field>
+        <field name="model_id" ref="model_delta_consol_group"/>
+        <field name="domain_force">[('company_ids', 'not any', [('id', 'not in', user.company_ids.ids)])]</field>
+    </record>
+    <record id="rule_consol_elimination_companies" model="ir.rule">
+        <field name="name">Elimination entry: all group companies allowed</field>
+        <field name="model_id" ref="model_delta_consol_elimination"/>
+        <field name="domain_force">[('group_id.company_ids', 'not any', [('id', 'not in', user.company_ids.ids)])]</field>
+    </record>
+    <record id="rule_consol_elimination_line_companies" model="ir.rule">
+        <field name="name">Elimination line: all group companies allowed</field>
+        <field name="model_id" ref="model_delta_consol_elimination_line"/>
+        <field name="domain_force">[('elimination_id.group_id.company_ids', 'not any', [('id', 'not in', user.company_ids.ids)])]</field>
+    </record>
+    <record id="rule_consol_report_line_own" model="ir.rule">
+        <field name="name">Group report line: own rows, all group companies allowed</field>
+        <field name="model_id" ref="model_delta_consol_report_line"/>
+        <field name="domain_force">[('user_id', '=', user.id), ('group_id.company_ids', 'not any', [('id', 'not in', user.company_ids.ids)])]</field>
+    </record>
+</odoo>

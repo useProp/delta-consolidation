@@ -24,13 +24,14 @@ EXPECTED = ROOT / 'delta_consolidation' / 'tests' / 'expected_figures.json'
 
 TRANSIT = 'IC cash in transit'
 CYE = 'Current year earnings'
+RE = 'Retained earnings'
 CTA = 'CTA'
 PL_SECTIONS = ('income', 'expense')
 INVOICE_SIGN = {'out_invoice': 1, 'out_refund': -1, 'in_invoice': -1, 'in_refund': 1}
 ROW_ORDER = [
     ('Bank', False), (TRANSIT, False), ('Receivable', False), ('Receivable', True),
     ('IC loan receivable', True), ('Payable', False), ('Bank loan', False), ('Payable', True),
-    ('IC loan payable', True), ('Capital', False), (CYE, False), (CTA, False),
+    ('IC loan payable', True), ('Capital', False), (RE, False), (CYE, False), (CTA, False),
 ]
 
 
@@ -145,10 +146,10 @@ class Oracle:
         for line in self.lines:
             if not line['ic']:
                 continue
+            if abs(line['amt']) < 0.005:          # exchange-difference lines carry no nominal
+                continue
             if line['cur'] != self.gcur:
                 exceptions.append(line['doc'])
-                continue
-            if abs(line['amt']) < 0.005:          # exchange-difference lines carry no nominal
                 continue
             by_doc[line['doc']].append(line)
         elim = []
@@ -194,12 +195,17 @@ class Oracle:
     def bs_detail(self, closing):
         """{(entity, label, is_ic): debit minus credit in USD} as of `closing`."""
         usd, local, totals = defaultdict(float), defaultdict(float), defaultdict(float)
+        year_start = date(closing.year, 1, 1)
+
+        def earnings(day):              # P&L before 1 January is retained earnings
+            return CYE if day >= year_start else RE
         for line in self.lines:
             if line['date'] > closing:
                 continue
             value = self.translate(line, closing)
             totals[line['co']] += value
-            key = (line['co'], CYE, False) if line['section'] in PL_SECTIONS else (line['co'], line['label'], bool(line['ic']))
+            key = ((line['co'], earnings(line['date']), False) if line['section'] in PL_SECTIONS
+                   else (line['co'], line['label'], bool(line['ic'])))
             usd[key] += value
             local[key] += line['bal']
         for co in self.companies:
@@ -209,13 +215,13 @@ class Oracle:
             if e['date'] > closing:
                 continue
             if e['section'] in PL_SECTIONS:
-                usd[('ELIM', CYE, False)] += e['usd']
+                usd[('ELIM', earnings(e['date']), False)] += e['usd']
             else:
                 usd[('ELIM', e['label'], e['kind'] == 'mirror')] += e['usd']
         return usd, local
 
     def section_of_label(self, label):
-        if label in (CYE, CTA):
+        if label in (CYE, RE, CTA):
             return 'equity'
         if label == TRANSIT:
             return 'asset'

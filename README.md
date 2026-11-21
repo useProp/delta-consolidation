@@ -47,7 +47,8 @@ Full rules: [`docs/SPEC.md`](docs/SPEC.md). In short:
 1. **Intercompany line** = a posted journal item whose partner is another group company, on a receivable/payable account, an account flagged *Intercompany* (the loan accounts), or an income/expense account (exchange-difference journal excluded).
 2. **Elimination entry** of a month: each intercompany line gets a mirror line `−amount_currency` in USD at nominal; whatever a document leaves unbalanced (a payment, the loan) goes to *IC cash in transit*. The two sides are never matched, so each is removed on its own date — the cut-off and cash-in-transit traps resolve themselves and cancel in the following month.
 3. **Translation to USD**: USD books as they are; intercompany USD lines at nominal; P&L and equity at the rate on the line date; other balances at the month-end rate; the difference is the company's CTA line in equity.
-4. **Lifecycle**: *Generate* rebuilds a draft, *Post* locks it. Building the report generates missing or draft entries from January up to the month and leaves posted ones alone.
+4. **Lifecycle**: *Generate* rebuilds a draft; *Post* regenerates it from the current books, locks it and freezes its counterparty reconciliation. The report uses posted entries as they are and computes the other months on the fly, so building it changes nothing.
+5. **Access**: only users allowed in all three companies see the group, its entries and its report; each user gets their own report rows.
 
 ## Demo data
 
@@ -56,7 +57,7 @@ One file, [`delta_consolidation/data/demo_dataset.json`](delta_consolidation/dat
 ## How the numbers are proven
 
 - [`docs/oracle.py`](docs/oracle.py) is a plain-Python calculation of the same rules, without Odoo. It wrote [`expected_figures.json`](delta_consolidation/tests/expected_figures.json) **before** the module existed; the tests only compare with it and contain no numbers.
-- 21 tests (`delta_consolidation/tests/`): company books in local currency, cut-off dates, books unchanged by eliminations, every entry's line count and totals, cut-off effect, credit note, cash in transit, loan, group P&L for each month, group balance sheet at each month end (row by row, per entity), counterparty reconciliation, idempotency and locking, the non-USD exception list, auditor rights, and the source links.
+- 28 tests (`delta_consolidation/tests/`): company books in local currency, cut-off dates, books unchanged by eliminations, every entry's line count and totals, cut-off effect, credit note, cash in transit, loan, group P&L for each month, group balance sheet at each month end (row by row, per entity), counterparty reconciliation, idempotency and locking, the non-USD exception list, auditor rights, the source links, and regressions for the independent review's findings (section lines, company isolation, exchange differences after reconciliation, prior-year activity, post after late documents).
 - The tests fail when the figures are wrong: changing one number in `expected_figures.json` makes `docker compose run --rm test` exit 1.
 
 | Group figures, USD | January | February | March | April |
@@ -75,8 +76,9 @@ See [`ASSUMPTIONS.md`](ASSUMPTIONS.md): 15 assumptions made before implementatio
 | --- | --- |
 | Elimination of investment in subsidiaries, equity, minority interest, unrealised profit | Not in the demo; the task's flows are services, invoices and a loan |
 | IAS 21 revaluation of intercompany USD balances in the subsidiaries | Simplification (assumption 8): the difference goes to CTA instead of P&L |
-| Opening balances and multi-year runs | One calendar year, no carry-forward of elimination effects (assumption 11) |
+| Opening balances and multi-year runs | Prior-year P&L is shown as retained earnings and prior-year intercompany items are eliminated, but year-end closing and opening balances are not modelled (assumption 11) |
 | Intercompany documents in other currencies | Detected and listed on the entry as exceptions, not eliminated |
+| Intercompany documents addressed to a contact of a group company | Detection matches the company's own partner exactly |
 | Account mapping between different charts of accounts | All companies use `generic_coa` (assumption 3) |
 | A "stale entry" flag when a document is backdated into a posted month | Reset that month's entry to draft and generate it again |
 | Average-rate translation of the P&L | Rate on the line date (assumption 7) |

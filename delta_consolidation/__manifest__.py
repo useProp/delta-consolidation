@@ -8,6 +8,7 @@
     'depends': ['account'],
     'data': [
         'security/ir.model.access.csv',
+        'security/rules.xml',
         'views/elimination_views.xml',
         'views/report_views.xml',
         'views/menus.xml',

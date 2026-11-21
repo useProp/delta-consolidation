@@ -35,6 +35,22 @@ The agent could not move the target:
 
 Lesson: tests on the numbers were right from the first green run, but three of the issues above were invisible to them and showed up only when the result was used the way a reviewer would use it.
 
-## Not done yet
+## Independent review
 
-- The plan's independent review — a fresh session without the implementation context, given `docs/SPEC.md` and the code, looking for discrepancies in the elimination and translation logic — has not been run.
+As the plan asks, a separate Claude Code session with no implementation context read `docs/SPEC.md`, the assumptions, the code and the oracle, without running anything, and reported 12 findings. Back in the implementation session, the human asked for the high and medium findings to be fixed. The agent wrote a regression test per finding together with the fix, then ran the new tests against the code before the fix (a temporary worktree at the previous commit) to confirm each one fails there; one test first failed there only on a missing method and was reshaped until it reproduced the real crash:
+
+| Finding | Severity | Outcome |
+| --- | --- | --- |
+| Invoice section/note lines (no account, but the invoice partner) crash Generate and the report | High | Confirmed (`'bool' object has no attribute 'startswith'` in `_is_ic`); amount-less lines filtered |
+| No company isolation: a one-company accountant sees all books of the group through the report | High | Confirmed; record rules plus an explicit check require access to all group companies |
+| Exchange-difference lines on IC accounts are translated to 0 | Medium | Rejected with reasoning (ASSUMPTIONS.md); a reconciliation test now covers the scenario, which no test had before |
+| Balance sheet takes all history, prior-year P&L lands in current year earnings, prior-year IC is not eliminated | Medium | Confirmed, shared by the oracle; "Retained earnings" split in both, eliminations from the first month with activity |
+| Post locks a stale draft | Medium | Confirmed; Post regenerates |
+| Reconciliation of a posted entry changes with the books | Medium-low | Confirmed; frozen on Post |
+| The read-only auditor creates draft entries; report rows shared between users | Medium-low | Confirmed; unposted months computed on the fly, rows per user |
+| Posted header editable, group deletion cascades, lines movable into a posted entry | Low | Confirmed; locked |
+| Account code of elimination rows read in the wrong company | Low | Fixed (no dedicated test) |
+| Transit attributed to the first counterparty; contacts of group partners not detected | Low | Not changed, recorded as out of scope |
+| SPEC signatures and oracle order drifted | Low | Aligned |
+
+The review was worth it: the two high findings were invisible to tests built on the demo data, because the demo has no section lines and only users with access to every company.

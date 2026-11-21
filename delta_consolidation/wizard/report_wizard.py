@@ -28,13 +28,14 @@ class ConsolReportWizard(models.TransientModel):
     def action_open_report(self):
         self.ensure_one()
         start = self._month_date()
-        # Report lines and missing draft eliminations are rebuilt as superuser, so the
-        # read-only auditor can build the report; the books are only read.
-        self.env['delta.consol.report.line'].sudo()._rebuild(self.group_id.sudo(), start)
+        self.group_id._check_user_access()
+        # Only the user's own report lines are written, as superuser, so the read-only auditor
+        # can build the report. Eliminations of unposted months are computed, not stored.
+        self.env['delta.consol.report.line'].sudo()._rebuild(self.group_id.sudo(), start, self.env.user)
         return {
             'type': 'ir.actions.act_window',
             'name': self.env._('Group report %s', start.strftime('%B %Y')),
             'res_model': 'delta.consol.report.line',
             'view_mode': 'pivot,list',
-            'domain': [('group_id', '=', self.group_id.id), ('month', '=', start)],
+            'domain': [('group_id', '=', self.group_id.id), ('month', '=', start), ('user_id', '=', self.env.uid)],
         }
