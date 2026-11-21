@@ -1,6 +1,6 @@
 # Task
 
-Transcribed from `docs/TASK.png`. The screenshot ends after item 4 of "What to build"; check the original handout for anything that follows.
+Transcribed from the original task screenshot (not kept in the repository). The screenshot ends after item 4 of "What to build"; check the original handout for anything that follows.
 
 There is no live-coding test. We want to see how you actually work: how you understand a business problem, which assumptions you make, how you build with your normal tools (with focus on your AI setup), and how you know the result is right.
 
