@@ -1,3 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_consol_group_user,consol.group.user,model_delta_consol_group,account.group_account_user,1,1,1,1
 access_consol_group_readonly,consol.group.readonly,model_delta_consol_group,account.group_account_readonly,1,0,0,0
+access_consol_elimination_user,consol.elimination.user,model_delta_consol_elimination,account.group_account_user,1,1,1,1
+access_consol_elimination_readonly,consol.elimination.readonly,model_delta_consol_elimination,account.group_account_readonly,1,0,0,0
+access_consol_elimination_line_user,consol.elimination.line.user,model_delta_consol_elimination_line,account.group_account_user,1,1,1,1
+access_consol_elimination_line_readonly,consol.elimination.line.readonly,model_delta_consol_elimination_line,account.group_account_readonly,1,0,0,0

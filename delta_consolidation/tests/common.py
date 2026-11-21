@@ -61,3 +61,18 @@ class DeltaCase(TransactionCase):
         is_ic = line.partner_id in others and (
             spec['account_type'] in ('asset_receivable', 'liability_payable') or spec.get('is_intercompany'))
         return spec['label'] + (' (IC)' if is_ic else '')
+
+    # ------------------------------------------------------------ helpers
+    def company_key(self, company):
+        return next(k for k, c in self.companies.items() if c == company)
+
+    def entry(self, month):
+        start, _end = month_bounds(month)
+        return self.env['delta.consol.elimination'].search(
+            [('group_id', '=', self.group.id), ('date_from', '=', start)])
+
+    def seed_label(self, company_key, account):
+        for key, acc in self.accounts[company_key].items():
+            if acc == account:
+                return self.data['accounts'][key]['label']
+        raise AssertionError(f'account {account.display_name} is not in the seeds')
