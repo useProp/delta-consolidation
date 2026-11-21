@@ -6,7 +6,9 @@
     'author': 'Delta Group',
     'license': 'LGPL-3',
     'depends': ['account'],
-    'data': [],
+    'data': [
+        'security/ir.model.access.csv',
+    ],
     'installable': True,
     'application': False,
 }

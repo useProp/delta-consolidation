@@ -26,3 +26,5 @@ Recorded when Odoo behaved differently from the plan or the plan left a detail o
 
 | Date | Decision | Reason |
 | --- | --- | --- |
+| 2026-11-21 | `generic_coa` writes its fiscal country (US) and that country's currency on the company. The loader restores the seed currency and clears `country_id` right after `try_loading` | `account/models/chart_template.py`, `_pre_reload_data`: on a company without accounting the currency is set from the fiscal country. A country left on the company would trigger `install_l10n_modules` on the next company write |
+| 2026-11-21 | The demo credit notes are linked to their invoice (`reversed_entry_id`) only after posting | Posting a move with `reversed_entry_id` reconciles it with the original (`account_move.py`, `_post` → `_reconcile_reversed_moves`). On the USD credit note in the PLN books this books an exchange difference of PLN 200 that the plan's figures exclude (demo documents are not reconciled). The engine ignores such lines anyway (`amount_currency = 0`) |
